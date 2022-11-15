@@ -1,0 +1,52 @@
+/*
+ * TIMER1_prog.c
+ *
+ *  Created on: Jul 28, 2022
+ *      Author: Shimaa_Ismail
+ */
+
+#include "TIMER1_int.h"
+
+void M_TIMER1_VoidPwm1Init(void)
+{
+	/* TO ENABLE OUTPUT CIRCUIT FOR PD5 */
+	M_DIO_void_setpinDirection(PORTD_ID,DIO_PIN5,PIN_DIRECTION_OUTPUT);
+    /* TO SELECT MODE 14 IN TABLE 47 */
+	CLR_BIT(TCCR1A_REG,WGM10);
+	SET_BIT(TCCR1A_REG,WGM11);
+	SET_BIT(TCCR1B_REG,WGM12);
+	SET_BIT(TCCR1B_REG,WGM13);
+
+	/* TO SELECT NON_INVERTING MODE */
+   SET_BIT(TCCR1A_REG,COM1A1);
+   CLR_BIT(TCCR1A_REG,COM1A0);
+}
+void M_TIMER1_VoidPwm1SetFreq(u32 Copy_u32Freq)
+{
+   ICR1_REG = ((F_OSC * 1000000)/ TIMER1_PRESCALER) / Copy_u32Freq ;
+}
+void M_TIMER1_VoidPwm1SetDutyCycle(f32 Copy_u8DutyCycle)
+{
+	OCR1A_REG = ((Copy_u8DutyCycle * ICR1_REG) / 100) - 1 ;
+}
+
+void M_TIMER1_VoidPwm1Start(void)
+{
+#if TIMER1_PRESCALER == 1024
+	SET_BIT(TCCR1B_REG,CS10);
+	CLR_BIT(TCCR1B_REG,CS11);
+	SET_BIT(TCCR1B_REG,CS12);
+
+
+#elif TIMER1_PRESCALER == 256
+	  CLR_BIT(TCCR1B_REG,CS10);
+	  CLR_BIT(TCCR1B_REG,CS11);
+	  SET_BIT(TCCR1B_REG,CS12);
+#endif
+}
+void M_TIMER1_VoidPwm1Stop(void)
+{
+		CLR_BIT(TCCR1B_REG,CS10);
+		CLR_BIT(TCCR1B_REG,CS11);
+		CLR_BIT(TCCR1B_REG,CS12);
+}
